@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/wa-backend/:path*",
+      "destination": "https://dhole-sir-coaching-classes-iqpg.onrender.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

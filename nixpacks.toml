@@ -1,0 +1,39 @@
+# nixpacks.toml — ROOT LEVEL
+# Forces Railway to ONLY build and run the backend.
+# Overrides ALL auto-detection (Vite, npm ci, etc.)
+
+[phases.setup]
+aptPkgs = [
+  "chromium",
+  "libnss3",
+  "libatk1.0-0",
+  "libatk-bridge2.0-0",
+  "libcups2",
+  "libxkbcommon0",
+  "libxcomposite1",
+  "libxdamage1",
+  "libxfixes3",
+  "libxrandr2",
+  "libgbm1",
+  "libasound2",
+  "fonts-liberation"
+]
+cmds = [
+  "if [ -x /usr/bin/chromium ] && [ ! -e /usr/bin/chromium-browser ]; then ln -s /usr/bin/chromium /usr/bin/chromium-browser; fi"
+]
+
+# Override install — ONLY install backend deps, never touch root
+[phases.install]
+cmds = ["npm install --prefix backend --legacy-peer-deps"]
+
+# Override build — do nothing (no Vite build)
+[phases.build]
+cmds = []
+
+[variables]
+CHROME_BIN = "/usr/bin/chromium"
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium"
+
+[start]
+cmd = "node backend/server.js"

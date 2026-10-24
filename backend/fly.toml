@@ -1,0 +1,34 @@
+# fly.toml � Fly.io deployment config for WhatsApp backend
+# Free tier: 3 shared-cpu-1x 256MB VMs always running (no sleep)
+# Deploy: cd backend && fly deploy
+
+app = "dhole-sir-whatsapp"
+primary_region = "sin"   # Singapore � closest to India
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3001"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 50
+    soft_limit = 30
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "whatsapp_sessions"
+  destination = "/app/sessions"

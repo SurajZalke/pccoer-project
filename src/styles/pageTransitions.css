@@ -1,0 +1,226 @@
+/* ============================================
+   PAGE TRANSITION ANIMATIONS
+   ============================================ */
+
+/* Smooth fade effect on page transition */
+@keyframes pageEnterFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide up effect on page transition */
+@keyframes pageEnterSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide down effect on page transition */
+@keyframes pageEnterSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide left effect on page transition */
+@keyframes pageEnterSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide right effect on page transition */
+@keyframes pageEnterSlideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale and fade effect on page transition */
+@keyframes pageEnterScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tab visibility fade effect */
+@keyframes tabVisibilityFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Blur effect on tab switch */
+@keyframes tabBlurEffect {
+  from {
+    filter: blur(0);
+  }
+  50% {
+    filter: blur(4px);
+  }
+  to {
+    filter: blur(0);
+  }
+}
+
+/* Glass morphism fade effect */
+@keyframes glassBlur {
+  from {
+    backdrop-filter: blur(0px);
+  }
+  50% {
+    backdrop-filter: blur(8px);
+  }
+  to {
+    backdrop-filter: blur(0px);
+  }
+}
+
+/* ============================================
+   PAGE TRANSITION UTILITY CLASSES
+   ============================================ */
+
+.page-enter-fade {
+  animation: pageEnterFade 0.4s ease-out forwards;
+}
+
+.page-enter-slide-up {
+  animation: pageEnterSlideUp 0.4s ease-out forwards;
+}
+
+.page-enter-slide-down {
+  animation: pageEnterSlideDown 0.4s ease-out forwards;
+}
+
+.page-enter-slide-left {
+  animation: pageEnterSlideLeft 0.4s ease-out forwards;
+}
+
+.page-enter-slide-right {
+  animation: pageEnterSlideRight 0.4s ease-out forwards;
+}
+
+.page-enter-scale {
+  animation: pageEnterScale 0.4s ease-out forwards;
+}
+
+.tab-visibility-fade {
+  animation: tabVisibilityFade 0.6s ease-out forwards;
+}
+
+.tab-blur-effect {
+  animation: tabBlurEffect 0.4s ease-out forwards;
+}
+
+.glass-blur {
+  animation: glassBlur 0.5s ease-out forwards;
+}
+
+/* ============================================
+   TAB SWITCH DETECTION STYLES
+   ============================================ */
+
+.tab-switch-detector {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5000;
+}
+
+.tab-switch-fade-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 5000;
+  mix-blend-mode: screen;
+  animation: tabVisibilityFade 0.6s ease-out forwards;
+}
+
+/* ============================================
+   PAGE TRANSITION STATE CLASSES
+   ============================================ */
+
+/* Smooth transition during navigation */
+.page-transitioning {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transitioned {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.4s ease-out;
+}
+
+/* Tab switch indicator */
+.tab-switch-active {
+  animation: pageEnterFade 0.3s ease-out;
+}
+
+/* ============================================
+   RESPONSIVE PAGE TRANSITIONS
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-fade,
+  .page-enter-slide-up,
+  .page-enter-slide-down,
+  .page-enter-slide-left,
+  .page-enter-slide-right,
+  .page-enter-scale,
+  .tab-visibility-fade,
+  .tab-blur-effect,
+  .glass-blur {
+    animation: pageEnterFade 0.1s ease-out forwards !important;
+  }
+
+  .page-transitioned {
+    transition: all 0.1s ease-out !important;
+  }
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+.page-transition-optimized {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

@@ -1,0 +1,53 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local Netlify folder
+.netlify
+
+# Debug logs and temporary debug files
+.dbg/
+
+# WhatsApp backend — never commit session data or service account keys
+backend/sessions/
+backend/.wwebjs_auth/
+backend/uploads/
+backend/generated_pdfs/
+backend/.env
+backend/serviceAccountKey.json
+backend/.cache/
+backend/.local-chromium/
+
+# Firebase service account keys — NEVER commit these
+*firebase-adminsdk*.json
+*serviceAccountKey*.json
+
+# Railway deployment helper (contains secrets � never commit)
+railway-env-vars.txt
+
+.vercel
+.env*

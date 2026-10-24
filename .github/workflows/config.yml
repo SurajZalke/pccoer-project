@@ -1,0 +1,45 @@
+name: Deployment Configuration Reference
+
+# RENDER BACKEND DEPLOYMENT
+# ==========================
+# Service Name: dhole-sir-backend
+# Runtime: Node
+# Region: Oregon (Free tier)
+# Build Command: npm install
+# Start Command: npm start
+# Plan: Free (restarts after 15 minutes of inactivity)
+
+# Environment Variables for Render:
+# - NODE_ENV=production
+# - PORT=3001
+# - FIREBASE_PROJECT_ID
+# - FIREBASE_PRIVATE_KEY_ID
+# - FIREBASE_PRIVATE_KEY (from firebase-adminsdk JSON)
+# - FIREBASE_CLIENT_EMAIL
+# - FIREBASE_CLIENT_ID
+# - FIREBASE_CLIENT_CERT_URL
+# - FIREBASE_DATABASE_URL
+# - FIREBASE_STORAGE_BUCKET
+# - EMAIL_USER
+# - EMAIL_PASSWORD
+# - OWNER_EMAIL
+# - JWT_SECRET
+# - TOKEN_EXPIRY
+# - ADMIN_UID
+# - ADMIN_SECRET
+# - FRONTEND_URL
+
+# NETLIFY FRONTEND DEPLOYMENT
+# ===========================
+# Site Name: vivekdhole-sir
+# Build Command: npm run build
+# Publish Directory: dist
+# Plan: Free
+
+# Environment Variables for Netlify:
+# - VITE_API_BASE_URL (set to Render backend URL)
+# - VITE_MAINTENANCE_MODE=false
+# - VITE_GROQ_API_KEY
+# - VITE_GEMINI_API_KEY
+# - VITE_CLOUDINARY_CLOUD_NAME
+# - VITE_CLOUDINARY_UPLOAD_PRESET

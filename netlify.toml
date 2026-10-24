@@ -1,0 +1,77 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# ── Environment variables injected at build time ──────────────────────────────
+# Both point to the same Render backend (WhatsApp + email/contact/auth routes
+# all live in the one Express server at backend/server.js).
+# "/wa-backend" is proxied below, so no CORS issues, no hardcoded URLs needed.
+[build.environment]
+  VITE_WA_BACKEND_URL = "/wa-backend"
+  VITE_API_BASE_URL = "/wa-backend"
+
+  # ── Set these in Netlify UI → Site settings → Environment variables ──────
+  # DO NOT put real secrets here — this file is public on GitHub.
+
+  # Firebase client SDK
+  VITE_FIREBASE_API_KEY = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_AUTH_DOMAIN = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_DATABASE_URL = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_PROJECT_ID = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_STORAGE_BUCKET = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_APP_ID = "SET_IN_NETLIFY_UI"
+  VITE_FIREBASE_MEASUREMENT_ID = "SET_IN_NETLIFY_UI"
+
+  # Other frontend vars
+  VITE_MAINTENANCE_MODE = "false"
+  VITE_RAZORPAY_KEY_ID = "SET_IN_NETLIFY_UI"
+
+  # Groq API Keys (add VITE_GROQ_API_KEY through VITE_GROQ_API_KEY9 in Netlify UI)
+  VITE_GROQ_API_KEY = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY1 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY2 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY3 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY4 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY5 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY6 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY7 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY8 = "SET_IN_NETLIFY_UI"
+  VITE_GROQ_API_KEY9 = "SET_IN_NETLIFY_UI"
+
+  # Gemini API Keys (add in Netlify UI)
+  VITE_GEMINI_API_KEY = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY2 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY3 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY4 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY5 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY6 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY7 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY8 = "SET_IN_NETLIFY_UI"
+  VITE_GEMINI_API_KEY9 = "SET_IN_NETLIFY_UI"
+
+  # Cloudinary
+  VITE_CLOUDINARY_NAME = "SET_IN_NETLIFY_UI"
+  VITE_CLOUDINARY_CLOUD_NAME = "SET_IN_NETLIFY_UI"
+  VITE_CLOUDINARY_UPLOAD_PRESET = "quiz_app"
+  VITE_CLOUDINARY_CLOUD_NAME1 = "SET_IN_NETLIFY_UI"
+  VITE_CLOUDINARY_UPLOAD_PRESET1 = "quiz_app"
+  VITE_CLOUDINARY_CLOUD_NAME2 = "SET_IN_NETLIFY_UI"
+  VITE_CLOUDINARY_UPLOAD_PRESET2 = "quiz_app"
+  VITE_CLOUDINARY_CLOUD_NAME3 = "SET_IN_NETLIFY_UI"
+  VITE_CLOUDINARY_UPLOAD_PRESET3 = "quiz_app"
+  VITE_CLOUDINARY_CLOUD_NAME4 = "SET_IN_NETLIFY_UI"
+  VITE_CLOUDINARY_UPLOAD_PRESET4 = "quiz_app"
+
+# ── Proxy: /wa-backend/* → Render backend ────────────────────────────────────
+[[redirects]]
+  from = "/wa-backend/*"
+  to = "https://dhole-sir-coaching-classes-iqpg.onrender.com/:splat"
+  status = 200
+  force = true
+
+# ── SPA fallback ──────────────────────────────────────────────────────────────
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,94 @@
+{
+  "emulators": {
+    "dataconnect": {
+      "dataDir": "dataconnect/.dataconnect/pgliteData",
+      "port": 9399
+    },
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5003
+    },
+    "firestore": {
+      "port": 8081
+    },
+    "database": {
+      "port": 9001
+    },
+    "pubsub": {
+      "port": 8085
+    },
+    "tasks": {
+      "port": 9501
+    },
+    "ui": {
+      "enabled": true,
+      "port": 8010
+    },
+    "hub": {
+      "port": 4402
+    },
+    "logging": {
+      "port": 4502
+    },
+    "singleProjectMode": true,
+    "storage": {
+      "port": 9199
+    }
+  },
+  "dataconnect": {
+    "source": "dataconnect"
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-south1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    },
+    {
+      "source": "msp",
+      "codebase": "msp",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    },
+    {
+      "source": "mspcollage",
+      "codebase": "mspcollage",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ],
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "remoteconfig": {
+    "template": "remoteconfig.template.json"
+  },
+  "extensions": {},
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

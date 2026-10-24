@@ -1,0 +1,104 @@
+{ 
+   "rules": { 
+     "users": { 
+       "$uid": { 
+         ".read": "auth != null && auth.uid === $uid", 
+         ".write": "auth != null && auth.uid === $uid" 
+       } 
+     }, 
+     "profiles": { 
+       "$uid": { 
+         ".read": "auth != null && auth.uid === $uid", 
+         ".write": "auth != null && auth.uid === $uid" 
+       } 
+     }, 
+     "games": { 
+       ".read": true, 
+       ".indexOn": ["code"], 
+       ".write": "auth != null", 
+       "$gameId": { 
+         ".read": true, 
+         ".write": "auth != null || (newData.hasChild('players') && auth == null)", 
+         "players": { 
+           "$playerId": {
+             ".read": true,
+           ".write": "auth != null && $playerId === auth.uid"
+         } 
+         } 
+       } 
+     }, 
+     "quizzes": { 
+       ".read": true, 
+       ".write": "auth != null", 
+       "$quizId": { 
+         ".read": true, 
+         ".write": "auth != null && (data.child('createdBy').val() === auth.uid || newData.child('createdBy').val() === auth.uid)" 
+       } 
+     }, 
+     "quizDrafts": { 
+       "$uid": { 
+         ".read": "auth != null && auth.uid === $uid", 
+         ".write": "auth != null && auth.uid === $uid" 
+       } 
+     },
+     "gameHistory": {
+       ".read": true,
+       ".write": "auth != null"
+     },
+     "sharedQuizResults": {
+       ".read": true,
+       ".write": "auth != null",
+         "$quizResultId": {
+           "players": {
+             "$playerId": {
+               ".write": "auth == null || (auth != null && $playerId === auth.uid)"
+             }
+         }
+       }
+     },
+     "folders": {
+       ".read": true,
+       ".write": "auth != null",
+       "$folderId": {
+         ".read": true,
+         ".write": "auth != null && (data.child('userId').val() === auth.uid || newData.child('userId').val() === auth.uid)"
+       }
+     },
+     "players": {
+       ".read": true,
+       ".write": "auth != null"
+     },
+     "omrExams": {
+       ".read": true,
+       ".write": "auth != null"
+     },
+     "omrSheets": {
+       ".read": true,
+       ".write": "auth != null"
+     },
+     "omrResults": {
+       "$uid": {
+         ".read": "auth != null && auth.uid === $uid",
+         ".write": "auth != null && auth.uid === $uid"
+       }
+     },
+     "students": {
+       ".read": "auth != null",
+       ".write": "auth != null && auth.uid === 'Ch0V3K1ELxPZyZiC439DrCeAjnM2'"
+     },
+     "classes": {
+       ".read": true,
+       ".write": "auth != null && auth.uid === 'Ch0V3K1ELxPZyZiC439DrCeAjnM2'"
+     },
+     "scheduledTests": {
+       ".read": "auth != null",
+       ".write": "auth != null && auth.uid === 'Ch0V3K1ELxPZyZiC439DrCeAjnM2'"
+     },
+     "whatsappGroups": {
+       "$uid": {
+         ".read": "auth != null && auth.uid === $uid",
+         ".write": "auth != null && auth.uid === $uid"
+       }
+     }
+   }
+ }

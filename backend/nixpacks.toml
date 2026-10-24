@@ -1,0 +1,3 @@
+# Intentionally minimal — Railway uses the Dockerfile instead.
+# WhatsApp runs on Baileys (WebSocket): no Chromium / Puppeteer required,
+# which keeps the image small and the memory footprint low.

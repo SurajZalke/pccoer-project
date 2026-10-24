@@ -1,0 +1,38 @@
+{
+  "name": "dhole-sir-whatsapp-backend",
+  "version": "1.0.0",
+  "description": "WhatsApp Automation Backend for PCCOER Education Platform",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo \"Build complete\""
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.2.0",
+    "firebase-admin": "^12.1.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.7",
+    "pdfkit": "^0.15.0",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
+    "resend": "^6.22.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

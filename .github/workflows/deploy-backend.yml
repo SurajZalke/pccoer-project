@@ -1,0 +1,49 @@
+name: Deploy Backend to Render
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Deploy to Render
+        run: |
+          curl -X POST \
+            "https://api.render.com/deploy/srv-${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json"
+        timeout-minutes: 30
+
+      - name: Verify deployment
+        run: |
+          echo "Waiting for backend to be live..."
+          for i in {1..30}; do
+            if curl -s https://dhole-sir-backend.onrender.com/health | grep -q "ok"; then
+              echo "✅ Backend is live!"
+              exit 0
+            fi
+            echo "Attempt $i: Waiting for backend..."
+            sleep 10
+          done
+          echo "❌ Backend deployment verification failed"
+          exit 1
+        timeout-minutes: 10

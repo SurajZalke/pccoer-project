@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /quizzes/{quizId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
+    }
+
+    match /passwordResetCodes/{email} {
+      allow read, write: if false; // Only Cloud Functions should access this
+    }
+
+    match /folders/{folderId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /students/{studentId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == 'Ch0V3K1ELxPZyZiC439DrCeAjnM2';
+    }
+
+    match /youtubeVideos/{videoId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == 'Ch0V3K1ELxPZyZiC439DrCeAjnM2';
+    }
+
+    match /profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /documents/{documentId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == 'Ch0V3K1ELxPZyZiC439DrCeAjnM2';
+    }
+
+    match /images/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+                   request.resource.size < 5 * 1024 * 1024 &&
+                   request.resource.contentType.matches('image/.*');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
