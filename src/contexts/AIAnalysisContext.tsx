@@ -5,7 +5,7 @@ import type { ChatMessage } from '@/services/aiProviderManager';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SK AI Context — provides AI analysis & chat functionality powered by
-// GROQ (llama-3.3-70b-versatile) with Gemini (gemini-2.5-flash) fallback.
+// GROQ (openai/gpt-oss-20b → gpt-oss-120b → llama-4-maverick) with Gemini (gemini-1.5-flash) fallback.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface AIAnalysisContextType {

@@ -62,21 +62,21 @@ const GROQ_KEYS  = collectKeys('VITE_GROQ_API_KEY');
 const GEMINI_KEYS = collectKeys('VITE_GEMINI_API_KEY');
 
 // Groq models to try in order — updated Oct 2026
-// gemma2-9b-it decommissioned; llama3-8b-8192 deprecated; using active models only
+// Retired from free tier: llama-3.1-8b-instant (Aug 16), llama-3.3-70b-specdec (Aug 16),
+//   llama-4-scout (Jun 17), mistral-saba-24b (Jul 2025)
+// Currently active on free tier (Oct 2026):
 const GROQ_MODELS = [
-  'meta-llama/llama-4-scout-17b-16e-instruct',    // Llama 4 Scout — fast & capable
-  'meta-llama/llama-4-maverick-17b-128e-instruct', // Llama 4 Maverick — best quality
-  'llama-3.1-8b-instant',                          // fast, high availability
-  'llama-3.3-70b-specdec',                         // high quality fallback
-  'mistral-saba-24b',                              // last resort fallback
+  'openai/gpt-oss-20b',                            // fastest, 1000 tok/s, free tier
+  'openai/gpt-oss-120b',                           // flagship open-weight, free tier
+  'meta-llama/llama-4-maverick-17b-128e-instruct', // Llama 4 Maverick — still on free tier
+  'qwen/qwen3.6-27b',                              // Qwen fallback — free tier
 ];
 
 // Gemini models to try in order — updated Oct 2026
-// gemini-2.5-flash requires paid tier; gemini-1.0-pro deprecated on v1beta
+// gemini-1.5-pro — 404 on v1beta free; gemini-2.5-flash — paid only
 const GEMINI_MODELS = [
-  'gemini-1.5-flash',      // high quota, fast, widely available
+  'gemini-1.5-flash',      // high quota, fast, widely available on free tier
   'gemini-1.5-flash-8b',   // highest free quota
-  'gemini-1.5-pro',        // better quality fallback
 ];
 
 // ==================== Per-Key Health State ====================
