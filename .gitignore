@@ -52,3 +52,4 @@ railway-env-vars.txt
 
 .vercel
 .env*
+!.env.production
