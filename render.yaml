@@ -1,9 +1,10 @@
 # Render.com deployment configuration
 # Backend: Node.js web service running from ./backend/
+# Set secret env vars in Render Dashboard → Environment
 
 services:
   - type: web
-    name: dhole-sir-coaching-classes
+    name: pccoer-project
     runtime: node
     rootDir: backend
     buildCommand: npm install --legacy-peer-deps
@@ -13,24 +14,23 @@ services:
     healthCheckPath: /health
     envVars:
       - key: PORT
-        value: 3001
+        value: 10000
       - key: NODE_ENV
         value: production
       - key: FIREBASE_DATABASE_URL
-        value: https://mspcollage-advance-2612-default-rtdb.firebaseio.com
+        value: https://pccoer-4f009-default-rtdb.asia-southeast1.firebasedatabase.app
       - key: FIREBASE_STORAGE_BUCKET
-        value: mspcollage-advance-2612.appspot.com
+        value: pccoer-4f009.firebasestorage.app
       - key: FRONTEND_URL
-        value: https://vivekdhole-sir.netlify.app
+        value: https://pccoerapp.vercel.app
       - key: ADMIN_UID
         value: Ch0V3K1ELxPZyZiC439DrCeAjnM2
-      # Set these as secret env vars in Render dashboard (never commit real values):
-      # FIREBASE_PROJECT_ID
-      # FIREBASE_CLIENT_EMAIL
-      # FIREBASE_PRIVATE_KEY
-      # ADMIN_SECRET
-      # EMAIL_USER
-      # EMAIL_PASSWORD
-      # OWNER_EMAIL
-      # JWT_SECRET
-      # TOKEN_EXPIRY
+      # ── Set these as SECRET env vars in Render Dashboard ──────────────────
+      # FIREBASE_SERVICE_ACCOUNT_JSON  (paste full JSON from Firebase Console)
+      # FIREBASE_PROJECT_ID            = pccoer-4f009
+      # ADMIN_SECRET                   (any strong random string)
+      # JWT_SECRET                     (any long random string)
+      # TOKEN_EXPIRY                   = 24h
+      # RESEND_API_KEY                 (from resend.com)
+      # EMAIL_USER / EMAIL_PASSWORD    (Gmail + App Password)
+      # OWNER_EMAIL                    (your email for contact form)

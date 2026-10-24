@@ -1,13 +1,13 @@
 /**
  * src/services/whatsappWebService.ts
- * Frontend service that talks to the whatsapp-web.js backend on Railway.
+ * Frontend service that talks to the whatsapp-web.js backend on Render.
  *
- * In production (Netlify): requests go to /wa-backend/* which Netlify proxies
- * to the Railway backend — no CORS issues, no hardcoded URLs.
- *
- * In local dev: falls back to http://localhost:3001
- *
- * Auth: automatically attaches the logged-in Firebase user's ID token.
+ * URL resolution order:
+ *  1. ?WA_BACKEND_URL=... query param (overrides everything — useful for testing)
+ *  2. VITE_WA_BACKEND_URL env var (set in .env for local dev)
+ *  3. Auto-detect:
+ *     - On Vercel/production (non-local hostname) → use '/wa-backend' proxy
+ *     - On localhost/LAN → use http://localhost:3001
  */
 
 import { getAuth } from 'firebase/auth';
@@ -24,10 +24,6 @@ const normalizeUrl = (raw: string): string => {
 };
 
 // ── Resolve backend URL ───────────────────────────────────────────────────────
-// Priority:
-//  1. VITE_WA_BACKEND_URL from env (set in netlify.toml as /wa-backend)
-//  2. localhost:3001 for local dev
-
 const envBackendUrl = normalizeUrl(
   import.meta.env.VITE_WA_BACKEND_URL ||
   import.meta.env.VITE_HA_BACKEND_URL ||
@@ -38,7 +34,6 @@ const queryBackendUrl = typeof window !== 'undefined'
   ? normalizeUrl(new URLSearchParams(window.location.search).get('WA_BACKEND_URL') || '')
   : '';
 
-// In local dev, fall back to localhost if no env var is set
 const localDevUrl = 'http://localhost:3001';
 
 function isLocalAddress(hostname: string): boolean {
@@ -46,9 +41,18 @@ function isLocalAddress(hostname: string): boolean {
     /^10\./.test(hostname) || /^192\.168\./.test(hostname) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
 }
 
-const isLocalHost = typeof window !== 'undefined' && isLocalAddress(window.location.hostname);
-const defaultBackendUrl = envBackendUrl || (isLocalHost ? localDevUrl : localDevUrl);
+// Auto-detect: on Vercel/production (non-local hostname) use the proxy path '/wa-backend'
+// On localhost/LAN: use localhost:3001 directly
+function resolveDefaultUrl(): string {
+  if (typeof window === 'undefined') return localDevUrl;
+  const hostname = window.location.hostname;
+  if (isLocalAddress(hostname)) return localDevUrl;
+  // Production (Vercel, or any public domain) — use same-origin proxy
+  return '/wa-backend';
+}
 
+// Priority: query param > .env var > auto-detect
+const defaultBackendUrl = envBackendUrl || resolveDefaultUrl();
 export let WA_BACKEND_URL: string = queryBackendUrl || defaultBackendUrl;
 
 export const setWABackendUrl = (url: string) => {
@@ -56,11 +60,11 @@ export const setWABackendUrl = (url: string) => {
 };
 
 export function isBackendConfigured(): boolean {
-  if (WA_BACKEND_URL.startsWith('/')) return true;             // Vercel/Netlify proxy path
+  if (WA_BACKEND_URL.startsWith('/')) return true;             // proxy path — always configured
   if (!WA_BACKEND_URL || WA_BACKEND_URL.includes('YOUR-RAILWAY-APP')) return false;
-  // If VITE_WA_BACKEND_URL was explicitly set in .env, always trust it
+  // Explicit env var set → trust it regardless of hostname
   if (envBackendUrl) return true;
-  // Fallback: only allow localhost URL when the page itself is on a local address
+  // localhost URL only valid when page is also on a local address
   if (WA_BACKEND_URL === localDevUrl && typeof window !== 'undefined') {
     return isLocalAddress(window.location.hostname);
   }
