@@ -104,9 +104,11 @@ export const useGameActions = (
       }
 
       // Now, trigger explanation generation in the background
-      // Do NOT await this call, so startGame can finish quickly
-      generateMissingExplanations(currentQuiz.id, currentQuiz.questions)
-        .catch(error => console.error("Background explanation generation failed:", error));
+      // ONLY if aiExplanationEnabled is true on the quiz
+      if (currentQuiz.aiExplanationEnabled !== false) {
+        generateMissingExplanations(currentQuiz.id, currentQuiz.questions)
+          .catch(error => console.error("Background explanation generation failed:", error));
+      }
 
     } catch (error: any) {
       console.error('Error starting game in Realtime Database:', error);

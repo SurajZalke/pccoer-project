@@ -512,14 +512,30 @@ const CreateQuizForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     return () => clearTimeout(timer);
   }, [topic]);
 
-  // Auto-generate questions when debouncedTopic changes
+  // Auto-generate questions when debouncedTopic changes — only if AI is enabled
   useEffect(() => {
-    if (debouncedTopic.trim().length >= 3) {
+    // Read AI enabled flag from Firebase profile before auto-generating
+    const maybeGenerate = async () => {
+      if (debouncedTopic.trim().length < 3) {
+        setSuggestedQuestions([]);
+        setShowSuggestionsModal(false);
+        return;
+      }
+      try {
+        if (currentUser?.uid) {
+          const { ref: dbR, get: dbG } = await import('firebase/database');
+          const profRef = dbR(database, `users/${currentUser.uid}/profile/aiExplanationEnabled`);
+          const snap = await dbG(profRef);
+          // If the flag is explicitly set to false, skip generation entirely
+          if (snap.exists() && snap.val() === false) {
+            setSuggestedQuestions([]);
+            return;
+          }
+        }
+      } catch { /* can't read flag — proceed */ }
       handleGenerateAiQuestions(debouncedTopic);
-    } else {
-      setSuggestedQuestions([]);
-      setShowSuggestionsModal(false);
-    }
+    };
+    maybeGenerate();
   }, [debouncedTopic]);
 
   useEffect(() => {
@@ -1421,7 +1437,7 @@ const CreateQuizForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
             <div>
               <label className="block text-sm font-medium dark:text-gray-200 mb-1">
-                Topic <span className="text-blue-400 text-xs">(Auto-generates questions after typing)</span>
+                Topic
               </label>
               <div className="relative">
                 <Input
@@ -1565,7 +1581,18 @@ const CreateQuizForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => handleSuggestOptions(qIndex)}
+                onClick={async () => {
+                  // Guard: only call if AI is enabled for this host
+                  if (currentUser?.uid) {
+                    const { ref: dbR, get: dbG } = await import('firebase/database');
+                    const snap = await dbG(dbR(database, `users/${currentUser.uid}/profile/aiExplanationEnabled`)).catch(() => null);
+                    if (snap?.exists() && snap.val() === false) {
+                      toast({ title: 'AI is disabled', description: 'Enable AI Explanation from your Dashboard to use this feature.', variant: 'destructive' });
+                      return;
+                    }
+                  }
+                  handleSuggestOptions(qIndex);
+                }}
                 disabled={suggestingForIndex === qIndex}
                 className="mt-1 text-xs text-purple-400 border-purple-400 hover:bg-purple-900/20"
               >

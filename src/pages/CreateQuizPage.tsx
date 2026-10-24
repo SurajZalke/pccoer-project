@@ -230,6 +230,8 @@ const CreateQuizPage: React.FC = () => {
   }, [currentUser?.uid]);
 
   const generateQuestionsForTopic = async (topicToUse: string) => {
+    // Only auto-generate when AI explanation is enabled
+    if (!aiExplanationEnabled) return;
     if (!topicToUse || topicToUse.trim().length < 3) return;
     if (topicToUse.trim() === lastGeneratedTopic.trim()) return;
     setLastGeneratedTopic(topicToUse.trim());
@@ -866,7 +868,10 @@ const CreateQuizPage: React.FC = () => {
               >
                 <label className="block text-sm font-semibold mb-3 text-white flex items-center gap-2">
                   <Brain className="w-5 h-5 text-indigo-400" />
-                  Topic <span className="text-xs text-indigo-300">(Auto-generates questions)</span>
+                  Topic
+                  {aiExplanationEnabled && (
+                    <span className="text-xs text-indigo-300">(AI generates questions on blur)</span>
+                  )}
                 </label>
                 <div className="relative">
                   <Input
@@ -876,11 +881,11 @@ const CreateQuizPage: React.FC = () => {
                     placeholder="e.g. Photosynthesis"
                     className="pl-14 pr-14 rounded-2xl border-2 border-white/10 bg-white/5 text-white placeholder:text-white/40 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all h-14 shadow-lg"
                   />
-                  {loadingAiQuestions && (
+                  {aiExplanationEnabled && loadingAiQuestions && (
                     <AiLoader />
                   )}
                 </div>
-                {loadingAiQuestions && suggestedQuestions.length === 0 && (
+                {aiExplanationEnabled && loadingAiQuestions && suggestedQuestions.length === 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -897,7 +902,7 @@ const CreateQuizPage: React.FC = () => {
                   </motion.div>
                 )}
 
-                {suggestedQuestions.length > 0 && !showSuggestionsModal && (
+                {aiExplanationEnabled && suggestedQuestions.length > 0 && !showSuggestionsModal && (
                   <motion.button
                     initial={{ opacity: 0, y: 10, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
