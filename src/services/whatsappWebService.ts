@@ -56,8 +56,11 @@ export const setWABackendUrl = (url: string) => {
 };
 
 export function isBackendConfigured(): boolean {
-  if (WA_BACKEND_URL.startsWith('/')) return true;
+  if (WA_BACKEND_URL.startsWith('/')) return true;             // Vercel/Netlify proxy path
   if (!WA_BACKEND_URL || WA_BACKEND_URL.includes('YOUR-RAILWAY-APP')) return false;
+  // If VITE_WA_BACKEND_URL was explicitly set in .env, always trust it
+  if (envBackendUrl) return true;
+  // Fallback: only allow localhost URL when the page itself is on a local address
   if (WA_BACKEND_URL === localDevUrl && typeof window !== 'undefined') {
     return isLocalAddress(window.location.hostname);
   }

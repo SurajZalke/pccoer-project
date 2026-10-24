@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/wa-backend/:path*",
-      "destination": "https://dhole-sir-coaching-classes-iqpg.onrender.com/:path*"
+      "destination": "https://pccoer-project.onrender.com/:path*"
     },
     {
       "source": "/(.*)",

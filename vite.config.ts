@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       "/wa-backend": {
-        target: "https://dhole-sir-coaching-classes.onrender.com",
+        target: "https://pccoer-project.onrender.com",
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/wa-backend/, ""),
       },
