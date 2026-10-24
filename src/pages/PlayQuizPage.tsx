@@ -446,63 +446,64 @@ const PlayQuizPage: React.FC = () => {
         toast({ title: 'Quiz Completed', description: 'Your score has been saved!' });
 
         // ── Auto-send result via WhatsApp ─────────────────────────────────
-        // Sends to: (1) the student's own number (if registered), and
-        //           (2) admin number 8554096571 always.
+        const ADMIN_PHONE = '918554096571';
         const autoSendWhatsApp = async () => {
+          const correct   = formattedAnswers.filter(a => a.correct).length;
+          const total     = quiz.questions.length;
+          const totalMark = quiz.questions.reduce((s, q) => s + (q.Marks || 1), 0);
+          const acc       = total > 0 ? ((correct / total) * 100).toFixed(1) : '0';
+          const date      = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+          const quizLink  = `${window.location.origin}/play-quiz/${paramId}`;
+
+          const studentMsg =
+            `*📊 Quiz Result — ${quiz.title}*\n\n` +
+            `Student: *${nickname}*\n` +
+            (rollNo  ? `Roll No: ${rollNo}\n`  : '') +
+            (classId ? `Class: ${classId}\n`   : '') +
+            `\nScore: *${score} / ${totalMark}*\n` +
+            `Correct: ${correct}/${total}  |  Accuracy: *${acc}%*\n\n` +
+            `${quizLink}\n${date} | PCCOER Education Platform 🎓`;
+
+          const adminMsg =
+            `*[Quiz Alert] ${quiz.title}*\n` +
+            `Student: *${nickname}*` +
+            (rollNo  ? ` | Roll: ${rollNo}`   : '') +
+            (classId ? ` | Class: ${classId}` : '') +
+            `\nScore: *${score}/${totalMark}*  Accuracy: *${acc}%*\n${date}`;
+
           try {
             const { isBackendConfigured, sendDirectMessage } =
               await import('@/services/whatsappWebService');
-            if (!isBackendConfigured()) return;
 
-            const correct   = formattedAnswers.filter(a => a.correct).length;
-            const total     = quiz.questions.length;
-            const totalMark = quiz.questions.reduce((s, q) => s + (q.Marks || 1), 0);
-            const acc       = total > 0 ? ((correct / total) * 100).toFixed(1) : '0';
-            const date      = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-            const quizLink  = `${window.location.origin}/play-quiz/${paramId}`;
-
-            const studentMsg =
-              `*Quiz Result — ${quiz.title}*\n\n` +
-              `Student: *${nickname}*\n` +
-              (rollNo  ? `Roll No: ${rollNo}\n`  : '') +
-              (classId ? `Class: ${classId}\n`   : '') +
-              `\n*Your Score*\n` +
-              `Score: *${score} / ${totalMark}*\n` +
-              `Correct: ${correct} / ${total} questions\n` +
-              `Accuracy: *${acc}%*\n` +
-              `\nPlay again: ${quizLink}\n` +
-              `Date: ${date}\n\n` +
-              `*PCCOER Education Platform*\nKeep learning! 🎓`;
-
-            const adminMsg =
-              `*[Quiz Result Alert]*\n` +
-              `Quiz: *${quiz.title}*\n` +
-              `Student: *${nickname}*` +
-              (rollNo  ? ` | Roll: ${rollNo}`   : '') +
-              (classId ? ` | Class: ${classId}` : '') +
-              `\nScore: *${score} / ${totalMark}*  |  Accuracy: *${acc}%*\n` +
-              `Date: ${date}`;
-
-            // Send to student's registered mobile (looked up by rollNo)
-            if (rollNo) {
-              const { getDatabase, ref: dbRef, get: dbGet } = await import('firebase/database');
-              const { app: fbApp } = await import('@/lib/firebaseConfig');
-              const db = getDatabase(fbApp);
-              const snap = await dbGet(dbRef(db, `players/${classId || ''}/${rollNo}`)).catch(() => null);
-              const mobile: string = snap?.val()?.mobile || snap?.val()?.phone || '';
-              if (mobile) {
-                await sendDirectMessage(mobile, studentMsg).catch(() => {});
+            if (isBackendConfigured()) {
+              // Look up student mobile from Firebase
+              if (rollNo) {
+                const { getDatabase, ref: dbRef, get: dbGet } = await import('firebase/database');
+                const { app: fbApp } = await import('@/lib/firebaseConfig');
+                const db = getDatabase(fbApp);
+                const snap = await dbGet(dbRef(db, `players/${classId || ''}/${rollNo}`)).catch(() => null);
+                const mobile: string = snap?.val()?.mobile || snap?.val()?.phone || '';
+                if (mobile) await sendDirectMessage(mobile, studentMsg).catch(() => {});
               }
+              // Always notify admin
+              await sendDirectMessage(ADMIN_PHONE, adminMsg).catch(() => {});
+              console.log('[PlayQuiz] ✅ WhatsApp result sent');
+              return;
             }
-
-            // Always notify admin number
-            await sendDirectMessage('8554096571', adminMsg).catch(() => {});
           } catch (waErr) {
-            console.warn('[PlayQuiz] WhatsApp auto-send failed:', waErr);
+            console.warn('[PlayQuiz] Backend send failed, using wa.me fallback:', waErr);
           }
+
+          // Fallback: wa.me link to admin (opens silently in background tab)
+          try {
+            window.open(
+              `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(adminMsg)}`,
+              '_blank', 'noopener'
+            );
+          } catch { /* browser blocked popup — acceptable */ }
         };
 
-        autoSendWhatsApp(); // fire-and-forget — don't block the UI
+        autoSendWhatsApp(); // fire-and-forget
         // ─────────────────────────────────────────────────────────────────
       } catch (err) {
         console.error('Error saving score:', err);

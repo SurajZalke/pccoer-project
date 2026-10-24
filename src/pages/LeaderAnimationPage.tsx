@@ -217,130 +217,126 @@ export const LeaderAnimationPage: React.FC<LeaderAnimationPageProps> = () => {
     if (!isHost || allSortedPlayers.length === 0 || !activeQuiz || autoSentRef.current) return;
     autoSentRef.current = true; // run once
 
+    const ADMIN_PHONE = '918554096571'; // always notify admin
+
     const autoSend = async () => {
+      const quizTitle  = activeQuiz.title || 'Quiz';
+      const quizLink   = `${window.location.origin}/play-quiz/${activeQuiz.id || ''}`;
+      const date       = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      const totalPl    = allSortedPlayers.length;
+
+      // Build top-3 summary (used for admin + groups)
+      const top3 = allSortedPlayers.slice(0, 3)
+        .map((p, i) => {
+          const medals = ['1st 🥇', '2nd 🥈', '3rd 🥉'];
+          const correct = p.answers?.filter(a => a.correct).length || 0;
+          const total   = activeQuiz.questions?.length || 0;
+          const acc     = total > 0 ? ((correct / total) * 100).toFixed(0) : '0';
+          return `${medals[i]} ${p.nickname || p.name} — ${p.score} pts | ${acc}%`;
+        })
+        .join('\n');
+
+      const summaryMsg =
+        `*🏆 Game Complete — ${quizTitle}*\n\n` +
+        `Total Players: *${totalPl}*\n\n` +
+        `*Top 3 Students*\n${top3}\n\n` +
+        `Date: ${date} | PCCOER Education Platform`;
+
+      // ── Try backend (connected WhatsApp) ─────────────────────────────────
       try {
         const { isBackendConfigured, sendDirectMessage, sendGroupMessage, listGroups } =
           await import('@/services/whatsappWebService');
-        if (!isBackendConfigured()) return; // WhatsApp not connected — skip silently
 
-        const { getDatabase, ref, get } = await import('firebase/database');
-        const { app } = await import('@/lib/firebaseConfig');
-        const db = getDatabase(app);
-
-        // Build mobile lookup: rollNo+classId → { mobile, parentPhone }
-        const playersSnap = await get(ref(db, 'players'));
-        const mobileByRoll: Record<string, { mobile: string; parentPhone: string; name: string }> = {};
-        const classesByRoll: Record<string, string> = {}; // rollNo → classId
-        if (playersSnap.exists()) {
-          const all = playersSnap.val() as Record<string, Record<string, any>>;
-          for (const classId in all) {
-            for (const rollNo in all[classId]) {
-              const p = all[classId][rollNo];
-              const key = `${classId}/${rollNo}`;
-              mobileByRoll[key] = {
-                mobile: p.mobile || '',
-                parentPhone: p.parentPhone || '',
-                name: p.name || '',
-              };
-              classesByRoll[rollNo] = classId;
+        if (isBackendConfigured()) {
+          // Lookup player mobiles from Firebase
+          const { getDatabase, ref, get } = await import('firebase/database');
+          const { app } = await import('@/lib/firebaseConfig');
+          const db = getDatabase(app);
+          const playersSnap = await get(ref(db, 'players'));
+          const mobileByRoll: Record<string, { mobile: string; parentPhone: string }> = {};
+          const classesByRoll: Record<string, string> = {};
+          if (playersSnap.exists()) {
+            const all = playersSnap.val() as Record<string, Record<string, any>>;
+            for (const classId in all) {
+              for (const rollNo in all[classId]) {
+                const p = all[classId][rollNo];
+                mobileByRoll[`${classId}/${rollNo}`] = { mobile: p.mobile || '', parentPhone: p.parentPhone || '' };
+                classesByRoll[rollNo] = classId;
+              }
             }
           }
-        }
 
-        const quizTitle  = activeQuiz.title || 'Quiz';
-        const quizLink   = `${window.location.origin}/play-quiz/${activeQuiz.id || ''}`;
-        const date       = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-        const totalPl    = allSortedPlayers.length;
+          const participatingClasses = new Set<string>();
 
-        // Determine which classes participated (for group send)
-        const participatingClasses = new Set<string>();
+          // Send individual result to each player
+          for (let i = 0; i < allSortedPlayers.length; i++) {
+            const p = allSortedPlayers[i];
+            const rollNo  = (p as any).rollNo || '';
+            const classId = (p as any).classId || classesByRoll[rollNo] || '';
+            const reg     = mobileByRoll[`${classId}/${rollNo}`] || { mobile: '', parentPhone: '' };
+            if (classId) participatingClasses.add(classId);
 
-        // Send individual results to each player
-        for (let i = 0; i < allSortedPlayers.length; i++) {
-          const p = allSortedPlayers[i];
-          const rollNo = (p as any).rollNo || '';
-          const classId = (p as any).classId || classesByRoll[rollNo] || '';
-          const key = `${classId}/${rollNo}`;
-          const reg = mobileByRoll[key] || { mobile: '', parentPhone: '' };
-
-          if (classId) participatingClasses.add(classId);
-
-          const correct = p.answers?.filter(a => a.correct).length || 0;
-          const total   = activeQuiz.questions?.length || 0;
-          const acc     = total > 0 ? ((correct / total) * 100).toFixed(1) : '0';
-          const rank    = i + 1;
-
-          const msg =
-            `*Quiz Result — ${quizTitle}*\n\n` +
-            `Student: *${p.nickname || p.name}*\n` +
-            (rollNo ? `Roll No: ${rollNo}\n` : '') +
-            (classId ? `Class: ${classId}\n` : '') +
-            `\n*Your Score*\n` +
-            `Score: *${p.score} / ${total}*\n` +
-            `Correct: ${correct} / ${total} questions\n` +
-            `Accuracy: *${acc}%*\n` +
-            `Rank: *${rank} out of ${totalPl}*\n` +
-            `\nPlay again: ${quizLink}\n` +
-            `Date: ${date}\n\n` +
-            `*PCCOER Education Platform*\nKeep learning, keep growing!`;
-
-          // Send to student
-          if (reg.mobile) {
-            await sendDirectMessage(reg.mobile, msg).catch(() => {});
-            await new Promise(r => setTimeout(r, 400));
-          }
-          // Send to parent (if different)
-          if (reg.parentPhone && reg.parentPhone !== reg.mobile) {
-            const parentMsg =
-              `*Quiz Result — ${quizTitle}*\n\n` +
-              `Student: *${p.nickname || p.name}*\n` +
-              (rollNo ? `Roll No: ${rollNo}\n` : '') +
-              `Score: *${p.score} / ${total}*  |  Rank: *${rank}/${totalPl}*\n` +
-              `Accuracy: *${acc}%*\n\n` +
-              `*PCCOER Education Platform*`;
-            await sendDirectMessage(reg.parentPhone, parentMsg).catch(() => {});
-            await new Promise(r => setTimeout(r, 400));
-          }
-        }
-
-        // Build class summary message
-        const top3 = allSortedPlayers.slice(0, 3)
-          .map((p, i) => {
-            const medals = ['1st', '2nd', '3rd'];
             const correct = p.answers?.filter(a => a.correct).length || 0;
             const total   = activeQuiz.questions?.length || 0;
-            const acc     = total > 0 ? ((correct / total) * 100).toFixed(0) : '0';
-            return `${medals[i]} ${p.nickname || p.name} — ${p.score} pts | ${acc}% accuracy`;
-          })
-          .join('\n');
+            const acc     = total > 0 ? ((correct / total) * 100).toFixed(1) : '0';
+            const rank    = i + 1;
 
-        const summaryMsg =
-          `*Game Complete — ${quizTitle}*\n\n` +
-          `Total Players: *${totalPl}*\n\n` +
-          `*Top 3 Students*\n${top3}\n\n` +
-          `Play again: ${quizLink}\n` +
-          `Date: ${date}\n\n` +
-          `*PCCOER Education Platform*`;
+            const msg =
+              `*📊 Quiz Result — ${quizTitle}*\n\n` +
+              `Student: *${p.nickname || p.name}*\n` +
+              (rollNo  ? `Roll No: ${rollNo}\n`  : '') +
+              (classId ? `Class: ${classId}\n`   : '') +
+              `\nScore: *${p.score} / ${total}*\n` +
+              `Correct: ${correct}/${total}  |  Accuracy: *${acc}%*\n` +
+              `Rank: *#${rank} of ${totalPl}*\n\n` +
+              `${quizLink}\n${date} | PCCOER Education Platform`;
 
-        // Send summary to all linked WhatsApp groups that match participating classes
-        try {
-          const groupsRes = await listGroups();
-          for (const group of groupsRes.groups) {
-            const nameLC = group.name.toLowerCase();
-            const matches = [...participatingClasses].some(cls =>
-              nameLC.includes(cls.toLowerCase()) || cls.toLowerCase().includes(nameLC)
-            );
-            if (matches) {
-              await sendGroupMessage(group.id, summaryMsg).catch(() => {});
-              await new Promise(r => setTimeout(r, 500));
+            if (reg.mobile) {
+              await sendDirectMessage(reg.mobile, msg).catch(() => {});
+              await new Promise(r => setTimeout(r, 400));
+            }
+            if (reg.parentPhone && reg.parentPhone !== reg.mobile) {
+              const parentMsg =
+                `*Quiz Result — ${quizTitle}*\n` +
+                `Student: *${p.nickname || p.name}* | Score: *${p.score}/${total}* | Rank: *#${rank}/${totalPl}*\n` +
+                `PCCOER Education Platform`;
+              await sendDirectMessage(reg.parentPhone, parentMsg).catch(() => {});
+              await new Promise(r => setTimeout(r, 400));
             }
           }
-        } catch {
-          // Groups not available — skip silently
+
+          // Always send summary to admin
+          await sendDirectMessage(ADMIN_PHONE, summaryMsg).catch(() => {});
+
+          // Send summary to matching WhatsApp groups
+          try {
+            const groupsRes = await listGroups();
+            for (const group of groupsRes.groups) {
+              const nameLC = group.name.toLowerCase();
+              const matches = [...participatingClasses].some(cls =>
+                nameLC.includes(cls.toLowerCase()) || cls.toLowerCase().includes(nameLC)
+              );
+              if (matches) {
+                await sendGroupMessage(group.id, summaryMsg).catch(() => {});
+                await new Promise(r => setTimeout(r, 500));
+              }
+            }
+          } catch { /* groups unavailable — skip */ }
+
+          console.log('[AutoSend] ✅ WhatsApp results sent via backend');
+          return; // success — done
         }
       } catch (err) {
-        console.warn('[AutoSend] WhatsApp auto-send failed:', err);
+        console.warn('[AutoSend] Backend send failed, using wa.me fallback:', err);
       }
+
+      // ── Fallback: open wa.me link so host can share summary manually ──────
+      // This fires only if backend is not configured or failed
+      const encodedMsg = encodeURIComponent(summaryMsg);
+      const waUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodedMsg}`;
+      console.info('[AutoSend] Backend unavailable — open this to send to admin:', waUrl);
+      // Silently open in background tab (won't block host UI)
+      try { window.open(waUrl, '_blank', 'noopener'); } catch { /* blocked by browser — acceptable */ }
     };
 
     // Small delay so the page renders first
