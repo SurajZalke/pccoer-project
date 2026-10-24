@@ -35,6 +35,7 @@ app.use(helmet());
 // Allowed origins — frontend URL
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:8081',
+  'https://pccoerapp.vercel.app',
   'https://vivekdhole-sir.netlify.app',
   'https://mspcollage-advance.netlify.app',
   'http://localhost:8080',
@@ -47,26 +48,25 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl requests)
+    // Allow requests with no origin (mobile apps, curl, Render health checks)
     if (!origin) return callback(null, true);
-    
-    // Check if origin is in allowed list
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      // Also allow localhost and local network IPs (10.x, 172.16-31.x, 192.168.x) during development
-      const isLocal = origin.includes('localhost') || 
-                      origin.includes('127.0.0.1') ||
-                      /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/.test(origin) ||
-                      /^http:\/\/172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+(:\d+)?$/.test(origin) ||
-                      /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin);
 
-      if (isLocal) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS not allowed'), false);
-      }
-    }
+    // Exact match
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Vercel preview deployments: *.vercel.app
+    if (/^https:\/\/[^.]+\.vercel\.app$/.test(origin)) return callback(null, true);
+
+    // Local network IPs (10.x, 172.16-31.x, 192.168.x) during development
+    const isLocal = origin.includes('localhost') ||
+                    origin.includes('127.0.0.1') ||
+                    /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/.test(origin) ||
+                    /^http:\/\/172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+(:\d+)?$/.test(origin) ||
+                    /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin);
+
+    if (isLocal) return callback(null, true);
+
+    callback(new Error('CORS not allowed'), false);
   },
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS', 'PUT', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-secret'],
