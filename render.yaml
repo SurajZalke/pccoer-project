@@ -1,12 +1,13 @@
-# Render.com deployment (free tier, no credit card)
-# Deploy: connect GitHub repo at render.com → New Web Service → select repo
+# Render.com deployment configuration
+# Backend: Node.js web service running from ./backend/
 
 services:
   - type: web
     name: dhole-sir-coaching-classes
-    runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install --legacy-peer-deps
+    startCommand: node server.js
     plan: free
     region: singapore
     healthCheckPath: /health
@@ -21,7 +22,6 @@ services:
         value: mspcollage-advance-2612.appspot.com
       - key: FRONTEND_URL
         value: https://vivekdhole-sir.netlify.app
-      # Backend URL: https://dhole-sir-coaching-classes-iqpg.onrender.com
       - key: ADMIN_UID
         value: Ch0V3K1ELxPZyZiC439DrCeAjnM2
       # Set these as secret env vars in Render dashboard (never commit real values):
@@ -30,7 +30,7 @@ services:
       # FIREBASE_PRIVATE_KEY
       # ADMIN_SECRET
       # EMAIL_USER
-      # EMAIL_PASSWORD       (Gmail App Password, NOT your normal password)
+      # EMAIL_PASSWORD
       # OWNER_EMAIL
-      # JWT_SECRET           (long random string)
-      # TOKEN_EXPIRY         (e.g. 24h)
+      # JWT_SECRET
+      # TOKEN_EXPIRY

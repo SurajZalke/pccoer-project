@@ -14,9 +14,9 @@
     "preview": "vite preview",
     "deploy": "npx vercel --prod",
     "deploy:netlify": "netlify deploy --prod",
-    "start": "node backend/server.js",
-    "start:backend": "node backend/server.js",
-    "install:backend": "cd backend && npm install",
+    "start": "cd backend && node server.js",
+    "start:backend": "cd backend && node server.js",
+    "install:backend": "cd backend && npm install --legacy-peer-deps",
     "setup:deployment": "node scripts/setup-deployment.js",
     "deploy:render": "echo 'Push to main branch to trigger Render deployment'",
     "deploy:netlify": "echo 'Push to main branch to trigger Netlify deployment'"
